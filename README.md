@@ -107,22 +107,27 @@ cd Team-NEXUS
 npm install
 ```
 
-### 3️⃣ Environment Variables
+## 3️⃣ 🔐 Environment Variables
 
-Create a file named `.env.local` in the project root and add:
+Create a `.env.local` file in the root directory and add the following:
 
-```
+```env
+# Firebase (Public – required for frontend)
 NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-```
 
-⚠️ **Important**
-- No secrets are committed to this repository
-- `.env.local` is ignored via `.gitignore`
+# Gemini API (Server-side only)
+GEMINI_API_KEY=your_gemini_api_key
+
+⚠️ Important
+	•	No secrets are committed to this repository
+	•	.env.local is ignored via .gitignore
+
+```
 
 ### 4️⃣ Run the Application
 
