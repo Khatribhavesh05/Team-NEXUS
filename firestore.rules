@@ -1,0 +1,112 @@
+/**
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model. The core principle is
+ * that users can only access data that exists within their own dedicated document
+ * tree. This approach provides strong security and privacy by default, preventing
+ * users from accessing or even being aware of other users' data.
+ *
+ * Data Structure:
+ * All user-specific data is stored under the path `/users/{userId}`, where
+ * `{userId}` corresponds to the user's Firebase Authentication UID. This creates
+ * a clear and isolated data silo for each user.
+ *
+ * Key Security Decisions:
+ * - User Privacy: Listing the top-level `/users` collection is explicitly
+ *   disallowed to prevent any possibility of enumerating the platform's users.
+ * - Ownership Enforcement: All read and write operations are gated by a check
+ *   that ensures the requesting user's UID matches the `{userId}` in the
+ *   document path.
+ * - Relational Integrity: On creation, the user profile document is required
+ *   to contain an `id` field that matches the user's UID, ensuring data
+ *   consistency between the document's path and its content. This `id` field
+ *   is immutable once set.
+ *
+ * Denormalization for Authorization:
+ * The security model relies on path-based authorization, which is the most
+ * performant method. The document path `/users/{userId}` itself contains the
+ * necessary authorization data (the user's ID), eliminating the need for any
+ * costly `get()` or `exists()` calls to other documents for ownership checks.
+ *
+ * Structural Segregation:
+ * The data model uses structural segregation by design. Each user's data is
+ * entirely contained within their own document path, making it impossible for
+ * queries or client-side logic to accidentally fetch another user's private data.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for reusable logic
+    // ===================================
+
+    /**
+     * Checks if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the requesting user's UID matches the given userId.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Checks if a document exists and if the requesting user is the owner.
+     * CRITICAL: Use for all update and delete operations to prevent modifying
+     * non-existent data and to enforce ownership.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * On create, validates that the new document's internal `id` field
+     * matches the `userId` from the document path. This enforces relational
+     * integrity between the path and the data.
+     */
+    function hasValidUserIdOnCreate(userId) {
+      return request.resource.data.id == userId;
+    }
+
+    /**
+     * On update, enforces that the critical `id` field linking the document
+     * to the user is immutable and cannot be changed.
+     */
+    function isUserIdImmutable() {
+      return request.resource.data.id == resource.data.id;
+    }
+
+
+    // Collection Rules
+    // ================
+
+    /**
+     * @description Controls access to a user's own profile document.
+     * @path /users/{userId}
+     * @allow (get) A user can read their own profile document. auth.uid must match {userId}.
+     * @allow (create) A user can create their own profile document. auth.uid must match {userId}.
+     * @deny (list) No user, including an owner, can list the `/users` collection for privacy.
+     * @deny (get) A user cannot read another user's profile.
+     * @principle Restricts access to a user's own data tree.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // Explicitly deny listing all users for privacy.
+      allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
+      allow update: if isExistingOwner(userId) && isUserIdImmutable();
+      allow delete: if isExistingOwner(userId);
+
+       /**
+       * @description Controls access to a user's projects subcollection.
+       * @path /users/{userId}/projects/{projectId}
+       * @allow (read, write) A user can manage their own projects.
+       */
+      match /projects/{projectId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+  }
+}
