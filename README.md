@@ -157,34 +157,20 @@ Open in browser: [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## 📂 Referenced Repository
+📂 Repository Information
 
-This repository is the official submission for **Ingenious 7.0 Hackathon**.
+This repository contains the source code and implementation of SkillPathAI, a career roadmap and skill tracking web application developed for learning and experimentation.
 
-**GitHub Repo:** [https://github.com/khatribhavesh05/Team-NEXUS](https://github.com/khatribhavesh05/Team-NEXUS)
+GitHub Repository:
+https://github.com/khatribhavesh05/Team-NEXUS
 
----
+⸻
 
-## 👥 Team Details
+🔐 Security & Configuration
+	•	No API keys or secrets are committed to the repository
+	•	All sensitive data is managed using environment variables
+	•	Firebase security rules are applied where applicable
 
-**Team Name:** NEXUS
-
-**Team Members:**
-- **Bhavesh Khatri** (Team Lead)
-  - Email: bhaveshkhatri1357@gmail.com
-- **Akshit Dadhich**
-
-**Institute:** JIET Jodhpur  
-**Program:** B.Tech (CSE – AI/ML), 2nd Year
-
----
-
-## 🔐 Security Confirmation
-
-- No API keys or secrets are committed
-- All sensitive data is managed via environment variables
-- Firebase security rules are applied
-
----
+⸻
 
 Thank you for reviewing SkillPathAI 🙌
